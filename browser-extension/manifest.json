@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Threads 防詐屏蔽插件",
+  "version": "1.0.0",
+  "description": "自動識別並屏蔽 Threads 上的詐騙貼文（台灣政府防詐計畫）",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://www.threads.net/*",
+    "https://threads.net/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Threads 防詐屏蔽",
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg",
+      "128": "icons/icon128.svg"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.threads.net/*",
+        "https://threads.net/*"
+      ],
+      "js": ["fraud-patterns.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
