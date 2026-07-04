@@ -6,7 +6,10 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.threads.net/*",
-    "https://threads.net/*"
+    "https://threads.net/*",
+    "https://www.threads.com/*",
+    "https://threads.com/*",
+    "https://gateway.sggcthreadsscamrev.dev/*"
   ],
   "action": {
     "default_popup": "popup.html",
