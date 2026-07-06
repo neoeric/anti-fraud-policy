@@ -20,16 +20,31 @@ chrome.storage.local.get(STORAGE_KEY, (data) => {
 });
 
 // React to settings changes from popup
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes[STORAGE_KEY]) {
-    settings = { ...settings, ...changes[STORAGE_KEY].newValue };
-    // Re-scan on mode change
-    document.querySelectorAll('[data-fraud-checked]').forEach((el) => {
-      el.removeAttribute('data-fraud-checked');
-      processedPosts.delete(el);
-    });
-    scanAllPosts();
-  }
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local' || !changes[STORAGE_KEY]) return;
+
+  const oldVal = changes[STORAGE_KEY].oldValue || {};
+  const newVal = changes[STORAGE_KEY].newValue || {};
+  settings = { ...settings, ...newVal };
+
+  // Only re-scan when a setting that actually affects detection changes.
+  // Ignore blockedCount-only updates — those are written by this very
+  // script (and by the background SW on navigation), and re-scanning on
+  // them would recount the same posts and loop indefinitely.
+  const needsRescan =
+    oldVal.enabled    !== newVal.enabled    ||
+    oldVal.mode       !== newVal.mode       ||
+    oldVal.gatewayUrl !== newVal.gatewayUrl ||
+    oldVal.extToken   !== newVal.extToken;
+
+  if (!needsRescan) return;
+
+  settings.blockedCount = 0; // rescan rebuilds the count from scratch
+  document.querySelectorAll('[data-fraud-checked]').forEach((el) => {
+    el.removeAttribute('data-fraud-checked');
+    processedPosts.delete(el);
+  });
+  scanAllPosts();
 });
 
 function saveSettings() {
@@ -74,29 +89,47 @@ function injectWarningBanner(el, tags, summary) {
   const banner = document.createElement('div');
   banner.className = 'fraud-warning-banner';
 
-  const tagHtml = tags.length
-    ? `<small>${tags.slice(0, 3).join('、')}</small>`
-    : '';
-  const summaryHtml = summary
-    ? `<small style="margin-top:2px;font-style:italic">${summary.slice(0, 80)}</small>`
-    : '';
+  // Build via DOM + textContent (never innerHTML): `tags`/`summary` may come
+  // from the backend, so treating them as HTML would be a DOM-XSS sink.
+  const icon = document.createElement('span');
+  icon.className = 'fraud-icon';
+  icon.textContent = '⚠️';
 
-  banner.innerHTML = `
-    <span class="fraud-icon">⚠️</span>
-    <span class="fraud-text">
-      <strong>疑似詐騙貼文</strong>
-      ${tagHtml}
-      ${summaryHtml}
-    </span>
-    <button class="fraud-dismiss" title="忽略此警告">✕</button>
-  `;
+  const textWrap = document.createElement('span');
+  textWrap.className = 'fraud-text';
 
-  banner.querySelector('.fraud-dismiss').addEventListener('click', (e) => {
+  const title = document.createElement('strong');
+  title.textContent = '疑似詐騙貼文';
+  textWrap.appendChild(title);
+
+  if (tags && tags.length) {
+    const tagEl = document.createElement('small');
+    tagEl.textContent = tags.slice(0, 3).join('、');
+    textWrap.appendChild(tagEl);
+  }
+
+  if (summary) {
+    const summaryEl = document.createElement('small');
+    summaryEl.style.marginTop = '2px';
+    summaryEl.style.fontStyle = 'italic';
+    summaryEl.textContent = summary.slice(0, 80);
+    textWrap.appendChild(summaryEl);
+  }
+
+  const dismiss = document.createElement('button');
+  dismiss.className = 'fraud-dismiss';
+  dismiss.title = '忽略此警告';
+  dismiss.textContent = '✕';
+  dismiss.addEventListener('click', (e) => {
     e.stopPropagation();
     banner.remove();
     el.style.removeProperty('opacity');
     el.style.removeProperty('filter');
   });
+
+  banner.appendChild(icon);
+  banner.appendChild(textWrap);
+  banner.appendChild(dismiss);
 
   el.style.opacity = '0.5';
   el.style.filter = 'grayscale(40%)';

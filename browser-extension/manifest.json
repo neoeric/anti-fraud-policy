@@ -24,7 +24,9 @@
     {
       "matches": [
         "https://www.threads.net/*",
-        "https://threads.net/*"
+        "https://threads.net/*",
+        "https://www.threads.com/*",
+        "https://threads.com/*"
       ],
       "js": ["fraud-patterns.js", "content.js"],
       "run_at": "document_idle"
