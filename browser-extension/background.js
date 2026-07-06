@@ -2,12 +2,25 @@
 
 const STORAGE_KEY = 'threadsFraudBlocker';
 
+const THREADS_HOSTS = new Set([
+  'threads.net', 'www.threads.net',
+  'threads.com', 'www.threads.com',
+]);
+
+function isThreadsUrl(url) {
+  try {
+    return THREADS_HOSTS.has(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 // Reset blocked count on Threads navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (
     changeInfo.status === 'loading' &&
     tab.url &&
-    tab.url.includes('threads.')
+    isThreadsUrl(tab.url)
   ) {
     chrome.storage.local.get(STORAGE_KEY, (data) => {
       const current = data[STORAGE_KEY] || {};

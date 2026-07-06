@@ -244,9 +244,14 @@ function startObserver() {
   injectStyles();
   scanAllPosts();
 
+  // Debounce: Threads' feed mutates the DOM in rapid bursts while
+  // scrolling — coalesce them into one scan instead of scanning per burst.
+  let scanTimer = null;
   const observer = new MutationObserver((mutations) => {
     const hasNew = mutations.some((m) => m.addedNodes.length > 0);
-    if (hasNew) scanAllPosts();
+    if (!hasNew) return;
+    clearTimeout(scanTimer);
+    scanTimer = setTimeout(scanAllPosts, 300);
   });
 
   observer.observe(document.body, { childList: true, subtree: true });

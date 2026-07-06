@@ -122,6 +122,23 @@
     .input-field:focus { border-color: #e85d04; }
     .input-field::placeholder { color: #bbb; }
 
+    /* Test / authorize button */
+    .test-btn {
+      width: 100%;
+      margin-top: 2px;
+      padding: 7px 8px;
+      border: 1.5px solid #e85d04;
+      border-radius: 6px;
+      background: #fff;
+      color: #e85d04;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .test-btn:hover:not(:disabled) { background: #fff4ed; }
+    .test-btn:disabled { opacity: 0.5; cursor: default; }
+
     /* Status dot */
     .status-row {
       display: flex; align-items: center; gap: 6px;
@@ -191,6 +208,7 @@
       <input class="input-field" id="extToken" type="password"
              placeholder="留空 = 不驗 token">
     </div>
+    <button class="test-btn" id="testBtn">授權並測試連線</button>
     <div class="status-row">
       <span class="dot" id="statusDot"></span>
       <span id="statusText">未設定後端（使用本機 pattern 偵測）</span>

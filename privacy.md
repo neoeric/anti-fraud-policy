@@ -80,5 +80,13 @@ We will process your request within 30 days of receipt.
 
 ---
 
-*本隱私政策適用於透過 Meta Threads API 存取資料的 threads_search_keyword 應用程式。*  
-*This privacy policy applies to the threads_search_keyword application accessing data via the Meta Threads API.*
+## 適用範圍 / Scope
+
+本隱私政策適用於本計畫的兩個元件：
+
+This privacy policy covers both components of this project:
+
+1. **threads_search_keyword** — 透過 Meta Threads API 存取資料的後端應用程式  
+   Backend application accessing data via the Meta Threads API
+2. **Threads 防詐屏蔽插件** — 瀏覽器擴充功能。未設定後端時，偵測全在使用者本機執行、不傳輸任何資料；設定後端（Gateway URL）後，會將頁面上公開貼文的文字（最多 500 字）與貼文網址傳送至後端進行詐騙比對，不傳送任何使用者個人資訊或瀏覽紀錄  
+   Browser extension. Without a backend configured, all detection runs locally and nothing is transmitted; with a Gateway URL configured, the text of public posts (up to 500 characters) and post URLs are sent to the backend for fraud matching. No user personal information or browsing history is transmitted.
